@@ -41,6 +41,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # Using third party tagging application
+    'taggit',
+
     # Django document generator
     'django.contrib.admindocs',
 
