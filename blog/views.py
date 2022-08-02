@@ -17,6 +17,31 @@ from .models import Post, Comment
 # Views function for blog
 
 def post_list(request, tag_slug=None):
+    """
+    Function to display all the posts divided into pages, 3 per page for now. Pages are created using the
+    paging feature provided by django. Only those posts will be displayed whose status is set to `posted`.
+
+    **Parameters**
+
+    Input parameters:
+
+        :parameter request: Fetch the request object from django call that contains the header and body tags, etc.
+        :parameter tag_slug: If this parameter is provided, then only posts with the mentioned tags are supplied.
+
+    View Returns:
+
+        :return Render: (:template:`blog/post/list.html`). This view function returns a rendered html page whose
+            template is mentioned in second variable of render function.
+
+    **Models**
+
+        ``Post``
+            An instance of :model:`blog.Post`.
+
+    **Templates**
+
+        :template:`blog/post/list.html`
+    """
     object_list = Post.objects.all()
     tag = None
     if tag_slug:

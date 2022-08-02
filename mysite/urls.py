@@ -15,6 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.contrib.sitemaps.views import sitemap
+# noinspection PyUnresolvedReferences
+from blog.sitemaps import PostSitemap
+
+sitemaps = {
+    'posts': PostSitemap,
+}
 
 urlpatterns = [
     # Admin blog generator by django
@@ -23,5 +30,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # Urls of blog
     path('blog/', include('blog.urls', namespace='blog')),
+    # Adding sitemap
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
 ]
 

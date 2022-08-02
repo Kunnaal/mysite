@@ -31,6 +31,9 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+# Defining site ID
+SITE_ID = 1
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -40,6 +43,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # Adding sitemap
+    'django.contrib.sites',
+    'django.contrib.sitemaps',
 
     # Using third party tagging application
     'taggit',
