@@ -3,6 +3,7 @@ This views function will capture and return the required views by the user.
 """
 
 
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank, TrigramSimilarity
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render, get_object_or_404
 # from django.views.generic import ListView
@@ -10,11 +11,43 @@ from django.core.mail import send_mail
 from django.db.models import Count
 from django.conf import settings
 from taggit.models import Tag
-from .forms import EmailPostForm, CommentForm
+from itertools import chain
+from .forms import EmailPostForm, CommentForm, SearchForm
 from .models import Post, Comment
 
 
 # Views function for blog
+
+
+def post_search(request):
+    form = SearchForm()
+    query = None
+    exact_results = []
+    similar_results = []
+    if 'query' in request.GET:
+        form = SearchForm(request.GET)
+        if form.is_valid():
+            query = form.cleaned_data['query']
+            search_vector = SearchVector('title', weight='A')+SearchVector('body', weight='B')
+            search_query = SearchQuery(query)
+            exact_results = Post.published.annotate(
+                search=search_vector,
+                rank=SearchRank(search_vector, search_query),
+            ).filter(rank__gte=0.2).order_by('-rank')
+            similar_results_temp = Post.published.annotate(
+                similarity=TrigramSimilarity('title', query),
+            ).filter(similarity__gte=0.1).order_by('-similarity')
+            similar_results_temp.union(Post.published.annotate(
+                similarity=TrigramSimilarity('body', query),
+            ).filter(similarity__gte=0.1).order_by('-similarity')).distinct()
+            similar_results = similar_results_temp
+            for result in similar_results_temp:
+                if result in exact_results:
+                    print('removing ', similar_results.get(id=result.id))
+                    similar_results = similar_results.exclude(id=result.id)
+    return render(request, 'blog/post/search.html', {'form': form, 'query': query, 'exact_results': exact_results,
+                                                     'similar_results': similar_results})
+
 
 def post_list(request, tag_slug=None):
     """
